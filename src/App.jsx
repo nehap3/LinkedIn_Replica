@@ -12,10 +12,8 @@ import Messaging from './pages/Messaging';
 import Notifications from './pages/Notifications';
 import Events from './pages/Events';
 import Search from './pages/Search';
+import Home from './pages/Home';
 import { Box } from '@mui/material';
-
-// Temporary placeholder components
-const Home = () => <Box p={3}>Home Feed Placeholder</Box>;
 
 function App() {
   const initializeAuth = useAuthStore((state) => state.initializeAuth);

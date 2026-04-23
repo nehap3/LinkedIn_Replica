@@ -16,6 +16,9 @@ const Home = () => {
                 ...doc.data()
             }));
             setPosts(fetchPosts);
+        }, (err) => {
+            console.error("Feed error:", err);
+            alert("Error loading feed: " + err.message);
         });
 
         return () => unsubscribe();

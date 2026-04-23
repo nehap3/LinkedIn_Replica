@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Grid, Paper, Avatar, Button } from '@mui/material';
-import { collection, query, getDocs, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, getDocs, addDoc, onSnapshot, doc, updateDoc, setDoc, deleteDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -44,9 +44,19 @@ const Connections = () => {
     };
 
     const handleAccept = async (requestId) => {
+        const req = requests.find(r => r.id === requestId);
+        if (!req) return;
+
         await updateDoc(doc(db, 'connections', requestId), {
             status: 'accepted'
         });
+
+        await setDoc(doc(db, 'users', req.senderId), {
+            connections: arrayUnion(req.receiverId)
+        }, { merge: true });
+        await setDoc(doc(db, 'users', req.receiverId), {
+            connections: arrayUnion(req.senderId)
+        }, { merge: true });
     };
 
     const handleReject = async (requestId) => {

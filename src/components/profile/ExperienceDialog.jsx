@@ -1,31 +1,33 @@
 import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, IconButton } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuthStore } from '../../store/useAuthStore';
 
-const EditProfileDialog = ({ open, onClose, user }) => {
-    const [displayName, setDisplayName] = useState(user.displayName || '');
-    const [headline, setHeadline] = useState(user.headline || '');
-    const [about, setAbout] = useState(user.about || '');
+const ExperienceDialog = ({ open, onClose, user }) => {
+    const [title, setTitle] = useState('');
+    const [company, setCompany] = useState('');
+    const [duration, setDuration] = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleSave = async () => {
+        if (!title || !company) return;
         setLoading(true);
         try {
+            const newExp = { title, company, duration };
             const userRef = doc(db, 'users', user.uid);
             await setDoc(userRef, {
-                displayName,
-                headline,
-                about
+                experience: arrayUnion(newExp)
             }, { merge: true });
+
+            const updatedExp = [...(user.experience || []), newExp];
             useAuthStore.setState((state) => ({
-                user: { ...state.user, displayName, headline, about }
+                user: { ...state.user, experience: updatedExp }
             }));
             onClose();
         } catch (error) {
-            console.error("Error updating profile:", error);
+            console.error("Error adding experience:", error);
         } finally {
             setLoading(false);
         }
@@ -34,42 +36,40 @@ const EditProfileDialog = ({ open, onClose, user }) => {
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
             <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                Edit intro
+                Add Experience
                 <IconButton onClick={onClose}><CloseIcon /></IconButton>
             </DialogTitle>
             <DialogContent dividers>
                 <TextField
                     autoFocus
                     margin="dense"
-                    label="Full Name"
+                    label="Title (e.g. Software Engineer)"
                     fullWidth
                     variant="outlined"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
                     sx={{ mb: 2 }}
                 />
                 <TextField
                     margin="dense"
-                    label="Headline"
+                    label="Company (e.g. Google)"
                     fullWidth
                     variant="outlined"
-                    value={headline}
-                    onChange={(e) => setHeadline(e.target.value)}
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
                     sx={{ mb: 2 }}
                 />
                 <TextField
                     margin="dense"
-                    label="About"
+                    label="Duration (e.g. Jan 2023 - Present)"
                     fullWidth
-                    multiline
-                    rows={4}
                     variant="outlined"
-                    value={about}
-                    onChange={(e) => setAbout(e.target.value)}
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
                 />
             </DialogContent>
             <DialogActions sx={{ p: 2 }}>
-                <Button onClick={handleSave} variant="contained" disabled={loading} sx={{ borderRadius: '20px', fontWeight: 'bold' }}>
+                <Button onClick={handleSave} variant="contained" disabled={loading || !title || !company} sx={{ borderRadius: '20px', fontWeight: 'bold' }}>
                     {loading ? 'Saving...' : 'Save'}
                 </Button>
             </DialogActions>
@@ -77,4 +77,4 @@ const EditProfileDialog = ({ open, onClose, user }) => {
     );
 };
 
-export default EditProfileDialog;
+export default ExperienceDialog;

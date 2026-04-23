@@ -1,12 +1,48 @@
-import React, { useState } from 'react';
-import { Box, Typography, Button, Avatar, Paper, Divider, IconButton, Grid, Chip } from '@mui/material';
+import React, { useState, useRef, useEffect } from 'react';
+import { Box, Typography, Button, Avatar, Paper, Divider, IconButton, Grid, Chip, CircularProgress } from '@mui/material';
 import { Edit as EditIcon, Add as AddIcon, CameraAlt as CameraAltIcon } from '@mui/icons-material';
 import { useAuthStore } from '../store/useAuthStore';
 import EditProfileDialog from '../components/profile/EditProfileDialog';
+import ExperienceDialog from '../components/profile/ExperienceDialog';
+import { db } from '../firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 const Profile = () => {
     const user = useAuthStore((state) => state.user);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [experienceDialogOpen, setExperienceDialogOpen] = useState(false);
+    const [uploadingPhoto, setUploadingPhoto] = useState(false);
+    const fileInputRef = useRef(null);
+
+    const handlePhotoUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file || !user) return;
+
+        if (file.size > 800000) {
+            alert("File is too large! Please select an image under 800KB.");
+            return;
+        }
+
+        setUploadingPhoto(true);
+
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            try {
+                const base64String = reader.result;
+                await setDoc(doc(db, 'users', user.uid), { photoURL: base64String }, { merge: true });
+
+                useAuthStore.setState((state) => ({
+                    user: { ...state.user, photoURL: base64String }
+                }));
+            } catch (error) {
+                console.error("Upload failed", error);
+                alert("Upload failed: " + error.message);
+            } finally {
+                setUploadingPhoto(false);
+            }
+        };
+        reader.readAsDataURL(file);
+    };
 
     if (!user) return null;
 
@@ -23,7 +59,11 @@ const Profile = () => {
                         </Box>
                         <Box sx={{ px: 3, pb: 3, position: 'relative' }}>
                             <Box sx={{ position: 'absolute', top: -76, left: 24, p: 0.5, backgroundColor: 'white', borderRadius: '50%' }}>
-                                <Avatar src={user.photoURL} sx={{ width: 140, height: 140, border: '4px solid white', cursor: 'pointer' }} />
+                                <input type="file" hidden ref={fileInputRef} onChange={handlePhotoUpload} accept="image/*" />
+                                <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                                    <Avatar onClick={() => !uploadingPhoto && fileInputRef.current && fileInputRef.current.click()} src={user.photoURL} sx={{ width: 140, height: 140, border: '4px solid white', cursor: 'pointer', opacity: uploadingPhoto ? 0.5 : 1 }} />
+                                    {uploadingPhoto && <CircularProgress size={40} sx={{ position: 'absolute', top: '50%', left: '50%', marginTop: '-20px', marginLeft: '-20px' }} />}
+                                </Box>
                             </Box>
 
                             <Box sx={{ display: 'flex', justifyContent: 'flex-end', pt: 2 }}>
@@ -54,12 +94,14 @@ const Profile = () => {
                         </Typography>
                     </Paper>
 
+                    {/* Activity Section removed as requested */}
+
                     {/* Experience Section */}
                     <Paper elevation={1} sx={{ borderRadius: 2, p: 3, mb: 2 }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Experience</Typography>
                             <Box>
-                                <IconButton><AddIcon /></IconButton>
+                                <IconButton onClick={() => setExperienceDialogOpen(true)}><AddIcon /></IconButton>
                                 <IconButton><EditIcon /></IconButton>
                             </Box>
                         </Box>
@@ -93,6 +135,14 @@ const Profile = () => {
                 <EditProfileDialog
                     open={editDialogOpen}
                     onClose={() => setEditDialogOpen(false)}
+                    user={user}
+                />
+            )}
+
+            {experienceDialogOpen && (
+                <ExperienceDialog
+                    open={experienceDialogOpen}
+                    onClose={() => setExperienceDialogOpen(false)}
                     user={user}
                 />
             )}

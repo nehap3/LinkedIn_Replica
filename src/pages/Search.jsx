@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Grid, Paper, Avatar, Button } from '@mui/material';
 import { useSearchParams } from 'react-router-dom';
-import { collection, query, getDocs } from 'firebase/firestore';
+import { collection, query, getDocs, addDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -61,7 +61,18 @@ const Search = () => {
                                                 <Typography variant="subtitle1" fontWeight="bold">{res.displayName}</Typography>
                                                 <Typography variant="body2" color="text.secondary">{res.headline}</Typography>
                                             </Box>
-                                            <Button variant="outlined" sx={{ borderRadius: 20, fontWeight: 'bold' }}>Connect</Button>
+                                            <Button
+                                                variant="outlined"
+                                                sx={{ borderRadius: 20, fontWeight: 'bold' }}
+                                                onClick={async () => {
+                                                    await addDoc(collection(db, 'connections'), {
+                                                        senderId: user.uid,
+                                                        receiverId: res.id,
+                                                        status: 'pending'
+                                                    });
+                                                    alert("Connection request sent!");
+                                                }}
+                                            >Connect</Button>
                                         </Box>
                                     ) : (
                                         <Box>

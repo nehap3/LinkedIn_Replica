@@ -26,6 +26,7 @@ const CreatePost = () => {
             setInput('');
         } catch (error) {
             console.error("Error creating post", error);
+            alert("Error creating post: " + error.message);
         } finally {
             setLoading(false);
         }
