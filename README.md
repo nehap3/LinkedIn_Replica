@@ -55,5 +55,3 @@ This application supports seamless deployment to **Netlify** or **GitHub Pages**
    npm run build
    ```
 2. The `dist/` directory can be drag-and-dropped into Netlify Drop, or you can deploy automatically by pushing to GitHub and linking your repo to Netlify's CI/CD.
-
-> **Security Note:** Ensure you have adequately configured your Firebase application's Firestore and Auth Security rules directly within your Firebase Dashboard before pushing to production.
