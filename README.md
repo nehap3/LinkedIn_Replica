@@ -3,8 +3,8 @@
 A full-stack professional networking platform built to help students connect, find internship/job opportunities, and build their professional presence.
 
 ## Wants to explore?
-[https://wonderful-biscuit-847ffc.netlify.app/login
-](https://wonderful-biscuit-847ffc.netlify.app/login)
+https://wonderful-biscuit-847ffc.netlify.app/login
+
 ## 🚀 Tech Stack
 
 - **Frontend Framework:** React (built seamlessly with Vite)
