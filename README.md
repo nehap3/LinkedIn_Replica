@@ -7,9 +7,6 @@ A full-stack professional networking platform built to help students connect, fi
 **Explore the application here:**
 https://wonderful-biscuit-847ffc.netlify.app/
 
-> **Demo Login:**
-> https://wonderful-biscuit-847ffc.netlify.app/login
-
 ## 🚀 Tech Stack
 
 * **Frontend Framework:** React (built with Vite)
