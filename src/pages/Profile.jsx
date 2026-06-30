@@ -11,6 +11,7 @@ const Profile = () => {
     const user = useAuthStore((state) => state.user);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [experienceDialogOpen, setExperienceDialogOpen] = useState(false);
+    const [editingExpIndex, setEditingExpIndex] = useState(null);
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
     const fileInputRef = useRef(null);
 
@@ -101,16 +102,28 @@ const Profile = () => {
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Experience</Typography>
                             <Box>
-                                <IconButton onClick={() => setExperienceDialogOpen(true)}><AddIcon /></IconButton>
-                                <IconButton><EditIcon /></IconButton>
+                                <IconButton onClick={() => {
+                                    setEditingExpIndex(null);
+                                    setExperienceDialogOpen(true);
+                                }}><AddIcon /></IconButton>
                             </Box>
                         </Box>
                         {user.experience?.length > 0 ? (
                             user.experience.map((exp, idx) => (
                                 <Box key={idx} sx={{ mb: 2 }}>
-                                    <Typography variant="subtitle1" fontWeight="bold">{exp.title}</Typography>
-                                    <Typography variant="body2">{exp.company}</Typography>
-                                    <Typography variant="caption" color="text.secondary">{exp.duration}</Typography>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                        <Box>
+                                            <Typography variant="subtitle1" fontWeight="bold">{exp.title}</Typography>
+                                            <Typography variant="body2">{exp.company}</Typography>
+                                            <Typography variant="caption" color="text.secondary">{exp.duration}</Typography>
+                                        </Box>
+                                        <IconButton onClick={() => {
+                                            setEditingExpIndex(idx);
+                                            setExperienceDialogOpen(true);
+                                        }}>
+                                            <EditIcon fontSize="small" />
+                                        </IconButton>
+                                    </Box>
                                     {idx !== user.experience.length - 1 && <Divider sx={{ mt: 2 }} />}
                                 </Box>
                             ))
@@ -142,8 +155,12 @@ const Profile = () => {
             {experienceDialogOpen && (
                 <ExperienceDialog
                     open={experienceDialogOpen}
-                    onClose={() => setExperienceDialogOpen(false)}
+                    onClose={() => {
+                        setExperienceDialogOpen(false);
+                        setEditingExpIndex(null);
+                    }}
                     user={user}
+                    editIndex={editingExpIndex}
                 />
             )}
         </Box>
